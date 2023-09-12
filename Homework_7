@@ -1,0 +1,296 @@
+; Tanya Khan
+; takhan
+
+; Mansi Gera 
+; mgera
+
+; The Assignment
+; 
+; There are two parts to this assignment. In Part 1, you will define data and functions for a hierarchy. In Part 2, you will use map and filter to
+; re-write some of the list functions we developed a couple of weeks ago.
+
+
+;;----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+; Part 1:
+; 
+; A river system can be represented as a hierarchy. For example, a list of some of the tributaries that feed into the Missouri River includes the Jefferson, Sun, Yellowstone, Madison, and Gallatin
+; Rivers. The Jefferson, in turn, is fed by the Beaverhead and Big Hole rivers. The Yellowstone is fed by the Gardner, Shields, and Boulder rivers, and so on. In this set of exercises you will
+; create a data definition for a river and its tributaries, and write programs that answer questions about the quality of the water in the rivers. Assume that for each river, measurements of the
+; river's pH and DO (dissolved oxygen) levels are available. Such measurements are taken at the confluence of the rivers (the point at which the tributaries converge). pH levels can range from 0
+; (most acidic) to 14 (most alkaline). The normal range for bodies of water are 6.5 to 8.5 . DO is measured in milligrams per liter (mg/L). DO levels are dependent on many factors, including water
+; temperature, salinity, atmospheric pressure, aeration, and bacterial levels. Dissolved oxygen levels can range from less than 1 mg/L to more than 20 mg/L depending on how all of these factors
+; interact. 
+
+
+
+; 1. (10 Points)  Provide data definitions for a river system. For each river in the hierarchy, you should record the following information: the name of the river, the
+; pH (ph) of the water, the DO (do) in mg/L, and a list of the tributaries (rivers) that feed into the river. The name of your struct should be river. Make sure
+; you define the fields for a river in the order given in the description.
+
+;(define-struct river (name ph do tributaries))
+
+;;a River is a (make-river String Number Number ListOfRivers))
+;;name is the name of the river
+;;ph is the ph of the river normally ranging between 6.5 and 8.5
+;;do is DO of the river in mg/L
+;;tributaries is a list of rivers that feed into the river
+
+
+;;a ListOfRiver is
+;;empty
+;;(cons River ListOfRiver)
+
+; 2. (5 Points)  Provide an example of a river system that starts with a single river and consists of at least two levels in the hierarchy below that. You may use the example given above
+; for the Missouri River, if you wish. (You may make up numbers for pH and DO - for these exercises we're not concerned about the accuracy of the information, just that you can provide a correct model
+; for the information.)
+
+(define-struct river (name ph do tributaries))
+
+(define AKSHAY       (make-river "akshay"          7.1  0.5  empty))
+(define MANSI        (make-river "mansi"           8.2  0.2  empty))
+(define TANYA        (make-river "tanya"           9.1  0.1  empty))
+(define RISHI        (make-river "rishi"           9.3  20   empty))
+(define DHRUV        (make-river "dhruv"           7.1  45   empty))
+(define ANANYA       (make-river "ananya"          8.1  60   empty))
+(define ANURAGI      (make-river "anuragi"         2.9  21   empty))
+(define AUGUST       (make-river "august"          1.1  8    (list ANANYA ANURAGI)))
+(define IBRAHEIM     (make-river "ibraheim"        2.4  1    (list AKSHAY DHRUV RISHI)))
+(define NYLAH        (make-river "nylah"           7.0  9    (list MANSI TANYA RISHI AKSHAY DHRUV)))
+
+; 3. (10 Points)  Provide the templates for your function definitions, i.e. river-fcn and list-of-river-fcn. 
+
+;  ;; River-fcn: River -> ...
+;  ;; ...
+;  (define (River-fcn            a-River)
+;    (...  (River-name           a-River)                        ;; String
+;          (River-ph             a-River)                        ;; Number
+;          (River-do             a-River)                        ;; Number
+;          (list-of-river-fcn (River-tributaries    a-River))    ;; ListOfRiver
+
+
+;; a ListOfRiver is a list of rivers (list ... ... ...)
+
+;; list-of-river-fcn:  ListOfRiver -> 
+;;
+;; (define (list-of-river-fcn alor)
+;;   (cond [(empty? alor)  (...)      ]
+;;         [(cons? alor)   (... (first River-fcn)
+;;                              (list-of-river-fcn (rest alor)))]))
+
+; 4. (30 Points)  Develop a function list-acidic-rivers that consumes a river system and produces a list of string. The function returns a list of the names of rivers in the system
+; that have a pH level lower than 6.5 .
+
+
+;; list-acidic-rivers: River -> ListOfString
+;; function consumes a river system and returns the list of the names of rivers
+;; in the system that have a pH level lower than 6.5
+
+(check-expect (list-acidic-rivers AKSHAY) empty)
+(check-expect (list-acidic-rivers  MANSI) empty)
+(check-expect (list-acidic-rivers AUGUST) (list "august" (list "anuragi" empty)))
+
+; FUNCTION 1
+(define (list-acidic-rivers a-river)
+  (if (> 6.5 (river-ph a-river))
+      (append (list (river-name a-river) (lesser-ph (river-tributaries a-river))))
+      (lesser-ph (river-tributaries a-river))))
+
+; lesser-ph: ListOfRiver -> ListOfString
+; function consumes a ListOfRivers and returns the list of the names of the ListOfRiver
+; in the system that have a pH level lower than 6.5 
+
+; FUNCTION 2
+(define (lesser-ph alor)
+  (cond [(empty? alor)  empty]
+        [(cons? alor) (append (list-acidic-rivers (first alor)) (lesser-ph (rest alor)))]))
+
+; 5. (30 Points)  Develop a function unhealthy? that consumes a river system and produces a boolean. The function returns true if any river in the system has a pH below 6.5 or over 8.5 or a DO under 6ppm. 
+
+; *NEED TO FIX* 
+;; unhealthy? : River -> Boolean
+;; function consumes a river system and returns true if any river in the system has a pH below 6.5
+;; or over 8.5 or a DO under 6ppm
+
+(check-expect (unhealthy? MANSI  )       #true )
+(check-expect (unhealthy? ANURAGI)       #true )
+(check-expect (unhealthy? DHRUV  )       #false)
+(check-expect (unhealthy? NYLAH  )       #true )
+
+
+(define (unhealthy? a-river)
+  (if (or (< 8.5 (river-ph a-river))
+          (> 6.5 (river-ph a-river))
+          (> 6 (river-do a-river)))
+      #true
+      (unhealthy-list? (river-tributaries a-river))))
+
+(define (unhealthy-list? alor)
+  (cond [(empty? alor) #false]
+        [(cons? alor) (if (unhealthy? (first alor))
+                          #true
+                          (unhealthy-list? (rest alor)))]))
+
+; ; FUNCTION 1
+; (define (list-acidic-rivers a-river)
+;   (if  (river-ph a-river))
+;       (append (list (river-name a-river) (lesser-ph (river-tributaries a-river))))
+;       (lesser-ph (river-tributaries a-river)))
+; 
+; ; FUNCTION 2
+; (define (lesser-ph alor)
+;   (cond [(empty? alor)  empty]
+;         [(cons? alor) (append (list-acidic-rivers (first alor)) (lesser-ph (rest alor)))]))
+
+
+  
+; 6.(30 Points)  Acid rain can lower the pH of water in a river system. Develop a function lower-all-ph that consumes a river system and produces a river system. The river system that is produced is the same
+; as the original, except that the pH of all the rivers in the system have been lowered by 0.3. 
+
+
+;; lower-all-ph: River -> River
+;; function will consume a river system and return the river system with a pH level lowered by 0.3
+
+
+(check-expect (lower-all-ph MANSI    ) (make-river "mansi"  7.9  0.2  empty))
+(check-expect (lower-all-ph IBRAHEIM ) (make-river "ibraheim" 2.1  1 (list (make-river "akshay" 6.8  0.5  empty) (make-river "dhruv" 6.8  45 empty) (make-river "rishi" 9.0  20 empty))))
+(check-expect (lower-all-ph AUGUST   ) (make-river "august" 0.8  8  (list (make-river "ananya" 7.8  60 empty) (make-river "anuragi" 2.6  21 empty))))
+ 
+
+; FUNCTION 1
+
+(define (lower-all-ph a-river)
+  (make-river (river-name a-river) (- (river-ph a-river) 0.3) (river-do a-river) (lower-a-ph (river-tributaries a-river))))
+
+; lower-a-ph: alor -> alor 
+; function will consume a ListOfRivers and return the river system with a pH level lowered by 0.3
+
+; FUNCTION 2
+(define (lower-a-ph alor)
+  (cond [(empty? alor)  empty]
+        [(cons? alor) (append (list (lower-all-ph (first alor))) (lower-a-ph (rest alor)))]))
+
+; 7. (30 Points)  Write a function find-subsystem that consumes the name of a river and a river system and produces either a river system or false. The function returns the portion of the original
+; river system that has the named river as its root. If there is no river in the system with the given name, the function returns false. 
+
+
+;; find-subsystem: String River -> River/Boolean
+;; consume name of the river and a river system to produce either a portion of the original
+;; river system that has a river in the system that has the named river as its root or false if there is no river in the system with the given name
+
+(check-expect (find-subsystem "mansi"  MANSI )                              MANSI)
+(check-expect (find-subsystem "tanya"  TANYA )                              TANYA)
+(check-expect (find-subsystem "akshay" MANSI )                             #false)
+(check-expect (find-subsystem "tanya"  AUGUST)                             #false)
+(check-expect (find-subsystem "ananya" AUGUST) (make-river "ananya" 8.1 60 empty))
+
+; FUNCTION 1 
+(define (find-subsystem name a-river)
+  (if (string=? (river-name a-river) name)
+      (make-river (river-name a-river) (river-ph a-river) (river-do a-river) (river-tributaries a-river))
+      (find-it (river-tributaries a-river) name)))
+      
+;; find-it: String alor -> River/Boolean 
+;; consumes name of a river and a ListOfRivers to produce either a portion of the original
+;; ListOfRivers that has a river in the List that has the named river as its root or false if there is no river in the List with the given name
+
+; FUNCTION 2
+(define (find-it alor name)
+  (cond [(empty? alor)  #false]
+        [(cons? alor) (if (string=? (river-name (first alor)) name)
+                          (find-subsystem name (first alor))
+                          (find-it (rest alor) name))]))
+                              
+;;----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+; 8. (20 Points)  Using map and/or filter (or other higher-order functions), define a new function dollar-menu-items with the following signature and purpose:
+; ;; dollar-menu-items:  ListOfMenu-items -> ListOfString
+; ;; consumes a list of menu items and produces a list of the names of all the items with prices of $1 or less
+
+
+
+(define-struct menu-item (name kind vegetarian? quantity cost-per-unit))
+
+(define PANI          (make-menu-item "water"             "beverage"   #true  4   0   ))
+(define LASSI         (make-menu-item "mango lassi"       "beverage"   #true  4   3.50))
+(define SOFT-DRINK-PK (make-menu-item "pakola"            "beverage"   #true  1   1.99))
+(define SOFT-DRINK-IN (make-menu-item "thumbs up"         "beverage"   #true  1   1.50))
+ 
+(define SAMOSA        (make-menu-item "chicken samosa"    "appetizer"  #false 1  10.99))
+(define PANEER        (make-menu-item "paneer 65"         "appetizer"  #true  1   9.5 ))
+(define PAKORA        (make-menu-item "onion pakora"      "appetizer"  #true  4   1   ))
+
+(define BIRYANI       (make-menu-item "goat biryani"       "entree"    #false 1  19.99))
+(define TIKKA         (make-menu-item "chicken tikka"      "entree"    #false 3  10.00))
+(define PALAK-PANEER  (make-menu-item "palak paneer"       "entree"    #true  2  8.25 ))
+(define RAJMA         (make-menu-item "rajma chawal"       "entree"    #true  6  5.25 ))
+
+
+(define LADOO         (make-menu-item "besan ladoo"        "dessert"   #true 10  0.25 ))
+(define HALWA         (make-menu-item "carrot halwa"       "dessert"   #true 3   7.99 ))
+(define BARFI         (make-menu-item "pista barfi"        "dessert"   #true 12  1.25 ))
+
+
+(define YUM1 (cons LASSI         (cons SAMOSA                    (cons HALWA     empty  ))))
+(define YUM2                     (cons PANEER (cons TIKKA        (cons BARFI     empty  ))))
+(define YUM3 (cons SOFT-DRINK-PK (cons PAKORA (cons PALAK-PANEER                 empty  ))))
+(define YUM4 (cons SOFT-DRINK-IN              (cons BIRYANI      (cons BARFI     empty  ))))
+(define YUM5 (cons PANI          (cons PAKORA (cons PALAK-PANEER (cons LADOO     empty )))))
+(define YUM6 (cons LASSI         (cons PANEER (cons RAJMA        (cons HALWA     empty )))))
+(define YUM7 (cons RAJMA  empty))
+(define YUM8 (cons LADOO (cons HALWA (cons BARFI empty))))
+
+;#;
+;(define (main-fn L)
+;  (local [(define (item-fn item)
+;            (Boolean))]
+;    (filter item-fn L)))
+
+(check-expect (dollar-menu-items YUM1) empty)
+(check-expect (dollar-menu-items YUM5) (list "water" "onion pakora" "besan ladoo"))
+(check-expect (dollar-menu-items YUM3) (list "onion pakora"))
+
+;; dollar-menu-items:  ListOfMenu-items -> ListOfString
+;; consumes a list of menu items and produces a list of the names of all the items with prices of $1 or less
+(define (dollar-menu-items alomi)
+  (local [(define (less-than-one? a-menu-item)
+            (>= 1 (menu-item-cost-per-unit a-menu-item)))]
+    (map menu-item-name (filter less-than-one? alomi))))
+
+;	• That map can be used when you need to run some function on every element of a list 
+;	• That map produces a list with the same number of elements as the original list 
+;	• That map provides a compact way to write certain functions over lists
+
+
+; 9. (15 Points)  Using map and/or filter (or other higher-order functions), define the function all-same-kind? that has the following signature and purpose:
+; ;; all-same-kind?:  ListOfMenu-item String -> Boolean
+; ;; consumes a ListOfMenu-items and a kind of food and produces true if every item is of that kind
+
+
+(check-expect (all-same-kind? YUM5 "apetizer") #false)
+(check-expect (all-same-kind? YUM7 "entree")  #true)
+(check-expect (all-same-kind? YUM8 "dessert") #true)
+
+;; all-same-kind?:  ListOfMenu-item String -> Boolean
+;; consumes a ListOfMenu-items and a kind of food and produces true if every item is of that kind
+(define (all-same-kind? alomi type)
+  (local [(define (is-it-the-same a-menu-item)
+            (string=? type (menu-item-kind a-menu-item)))]
+    (andmap is-it-the-same alomi)))
+
+; 10. (15 Points)  Using map and/or filter (or other higher-order functions),redefine the function list-expensive-vegetarian that you wrote for Homework 3, that has the following signature and purpose:
+; ;; list-expensive-vegetarian:  ListOfMenu-item Number -> ListOfMenu-item
+; ;; consumes a list of menu items and returns a list of those vegetarian items that exceed the given amount
+
+
+(check-expect (list-expensive-vegetarian YUM1 1) (list "mango lassi" "carrot halwa"))
+(check-expect (list-expensive-vegetarian YUM2 2) (list "paneer 65"))
+(check-expect (list-expensive-vegetarian YUM3 6) (list "palak paneer"))
+
+;; list-expensive-vegetarian:  ListOfMenu-item Number -> ListOfMenu-item
+;; consumes a list of menu items and returns a list of those vegetarian items that exceed the given amount
+(define (list-expensive-vegetarian alomi amt)
+  (local [(define (does-veg-exceed a-menu-item)
+            (and (menu-item-vegetarian? a-menu-item) (> (menu-item-cost-per-unit a-menu-item) amt)))]
+    (map menu-item-name (filter does-veg-exceed alomi))))
